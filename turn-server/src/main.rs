@@ -52,7 +52,7 @@ async fn main() -> Result<(), Error> {
     // let long_term_auth_handler= LongTermAuthHandler::new(SHARED_SECRET.to_string());
     // let (user, pass) = generate_long_term_credentials(SHARED_SECRET, Duration::from_secs(600000))?;
 
-    let public_ip = "192.168.178.60";
+    let public_ip = "159.223.185.89";
     let port = "3478";
     let realm = "realm";
 
@@ -74,7 +74,7 @@ async fn main() -> Result<(), Error> {
         min_port: 3000,
         max_port: 60000,
         max_retries: 10,
-        address: "192.168.178.60".to_owned(),
+        address: "159.223.185.89".to_owned(),
         net: Arc::new(Net::new(None)),
     });
 

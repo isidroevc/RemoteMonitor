@@ -11,7 +11,7 @@ use web_sys::{
     Document, Element, HtmlButtonElement, HtmlInputElement, HtmlLabelElement, HtmlVideoElement,
     MediaStream, MediaStreamConstraints, MessageEvent, RtcConfiguration, RtcDataChannel,
     RtcDataChannelEvent, RtcIceConnectionState, RtcPeerConnection, WebSocket,
-    Window, window, RtcIceCredentialType, RtcIceServer, RtcIceTransportPolicy
+    RtcIceCredentialType, RtcIceServer, RtcIceTransportPolicy,
 };
 
 use shared_protocol::{SessionID, SignalEnum, UserID};
@@ -472,7 +472,6 @@ pub async fn setup_initiator(
     onmessage_callback.forget();
 
     let btn_cb = Closure::wrap(Box::new(move || {
-        //HERE CONNECTS
         let ws_clone = ws_clone_external.clone();
         let peer_a_clone = peer_a_clone_external.clone();
         let rc_state_clone = rc_state_clone_ext.clone();
@@ -563,7 +562,7 @@ fn set_html_label(html_label: &str, session_id: String) {
 }
 
 fn get_session_id_from_input() -> String {
-    let window: Window = web_sys::window().expect("No window Found, We've got bigger problems here");
+    let window = web_sys::window().expect("No window Found, We've got bigger problems here");
     let document: Document = window.document().expect("Couldn't Get Document");
     let sid_input = "sid_input";
 
@@ -616,50 +615,6 @@ fn try_connect_to_session(ws: WebSocket) {
             error!("Error Sending SessionJoin {:?}", e);
         }
     }
-}
-
-fn try_connect_to_session_auto(ws: WebSocket, session_id_str: String) {
-    let session_id = SessionID::new(session_id_str);
-    let msg = SignalEnum::SessionJoin(session_id);
-    let ser_msg: String = match serde_json_wasm::to_string(&msg) {
-        Ok(x) => x,
-        Err(e) => {
-            error!("Could not serialize SessionJoin {}", e);
-            return;
-        }
-    };
-    match ws.send_with_str(&ser_msg) {
-        Ok(_) => {}
-        Err(e) => {
-            error!("Error Sending SessionJoin {:?}", e);
-        }
-    }
-}
-
-pub fn set_on_load(websocket: WebSocket) {
-    debug!("Executing set_on_load");
-    let ws_clone_external = websocket;
-    let onload_cb = Closure::wrap(Box::new(move || {
-        //HERE CONNECTS
-        debug!("Executing onload function");
-        let window = window().expect("Window object was expected to be accesible");
-
-        let ws_clone = ws_clone_external.clone();
-
-        let doccument = window.document().expect("Documment must be available");
-        let url = doccument.url().expect("URL must be provided");
-        let url = url.trim();
-        let url_parts = url.split("?cid=").collect::<Vec<&str>>();
-        let session_id = url_parts.last().expect("URL expected to have at least two parts");
-        let session_id = session_id.to_owned().to_owned();
-        debug!("Session id: {}", session_id);
-        try_connect_to_session_auto(ws_clone, session_id);
-    }) as Box<dyn FnMut()>);
-    let window = window().
-        expect("Window object was expected to be accesible");
-
-    window.set_timeout_with_callback_and_timeout_and_arguments_0(onload_cb.as_ref().unchecked_ref(), 5000);
-    onload_cb.forget();
 }
 
 async fn send_video_offer(rtc_conn: RtcPeerConnection, ws: WebSocket, session_id: SessionID) {

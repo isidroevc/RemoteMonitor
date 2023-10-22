@@ -13,7 +13,7 @@ use wasm_bindgen::UnwrapThrowExt;
 
 use common::{
     create_stun_peer_connection, create_turn_peer_connection, create_plain_peer_connection, setup_initiator, setup_listener,
-    setup_show_signalling_server_state, setup_show_state, AppState, set_on_load
+    setup_show_signalling_server_state, setup_show_state, AppState,
 };
 use ice::{received_new_ice_candidate, setup_rtc_peer_connection_ice_callbacks};
 use sdp::{create_sdp_offer, receive_sdp_answer, receive_sdp_offer_send_answer};
@@ -49,6 +49,4 @@ pub async fn start() {
         .await
         .unwrap_throw();
     info!("Setup Listener");
-
-    set_on_load(websocket.clone());
 }
